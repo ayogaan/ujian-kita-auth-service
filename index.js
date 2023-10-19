@@ -7,7 +7,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const roleRoutes = require('./routes/roleRoutes')
 const authRoutes = require('./routes/authRoutes')
 
 app.use(helmet());
@@ -15,7 +14,7 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan('combined'));
 app.use('/api/user', authRoutes);
-app.use('/api/role', roleRoutes);
+//app.use('/api/role', roleRoutes);
 
 const db = require("./models");
 db.sequelize.sync({ force: true })

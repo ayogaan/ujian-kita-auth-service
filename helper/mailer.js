@@ -26,3 +26,22 @@ exports.sendVerificationEmail = (user, token) => {
     }
   });
 };
+
+exports.sendForgotPasswordEmail = (user, token) =>{
+    const verificationLink = `${process.env.base_url}api/user/reset-password?token=${token}`;
+    const mailOptions = {
+        from: 'your-email@gmail.com',
+        to: user.email,
+        subject: 'Change password',
+        text: `Click the following link to change your password : ${verificationLink}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log('Error sent mail', error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+
+}

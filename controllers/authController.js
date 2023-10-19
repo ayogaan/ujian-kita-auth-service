@@ -64,8 +64,7 @@ exports.verify = async(req,res) =>{
     const userLoggedin = await user.update( {is_validate : true},{ where: { id: userId } });
     console.log(userLoggedin);
     if(!userLoggedin){
-      res.send([userLoggedin. userId]);
-
+      res.send('Email verified failed.');
     }
     res.send('Email verified successfully.');
 
@@ -73,6 +72,51 @@ exports.verify = async(req,res) =>{
     // Handle token verification failure
     res.send(err);
   }
+}
+
+exports.forgotPasswordSend = async(req,res)=>{
+
+  var {email} = req.body;
+  try{
+    
+    const data = await user.findOne({ where: { email } });
+    if (!data) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const token = jwt.sign({ id: data.id, name: data.name }, 'yourSecretKey', {
+      expiresIn: '1h', 
+    });
+    mailer.sendForgotPasswordEmail(data, token)
+    return res.status(200).json({ success:true, message: 'reset password email sent' });
+
+  } catch(err){
+    return res.status(500).json({ success:false, message: 'internal server error', err:err });
+
+  }
+  
+}
+
+exports.changePassword = async (req,res)=>{
+  try{
+  var {token} = req.query;
+  var {newPassword} = req.body;
+  console.log(newPassword);
+  //validate jwt
+  var decoded = jwt.verify(token, 'yourSecretKey');
+  const userId = decoded.id
+  const hashedPassword = await hashPassword(newPassword)
+  console.log(hashedPassword)
+  var userdata = await user.update({password : hashedPassword}, {where: {id: userId}})
+  if(!userdata){
+    res.send({success:false, message:"user not found"})
+  }
+  res.send({success:true, message:"password updated"})
+
+  //update password
+  }catch(err){
+    res.send({success:false, message:"something went wrong", error: err.message})
+  }
+  
 }
 
 const hashPassword = async (password, saltRounds = 10) => {
